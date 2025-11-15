@@ -1,0 +1,21 @@
+{
+  "name": "aitrading",
+  "version": "1.0.0",
+  "description": "AI-Powered Trading Analysis Platform",
+  "main": "index.html",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build step required'"
+  },
+  "keywords": ["trading", "ai", "binance", "crypto"],
+  "author": "AI Trading Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "node-fetch": "^2.6.7"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
