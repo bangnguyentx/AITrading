@@ -1,5 +1,5 @@
 {
-  "name": "aitrading",
+  "name": "quantum-trading-suite",
   "version": "1.0.0",
   "description": "AI-Powered Trading Analysis Platform",
   "main": "index.html",
@@ -8,7 +8,7 @@
     "build": "echo 'No build step required'"
   },
   "keywords": ["trading", "ai", "binance", "crypto"],
-  "author": "AI Trading Team",
+  "author": "Quantum Trading Team",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
