@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quantum Trading Suite — Binance Futures PRO</title>
+  <meta name="description" content="Quantum Trading Suite - demo tích hợp Binance Futures public API + trading engine (demo)." />
+  <style>
+    /* Nhỏ gọn: style demo */
+    body{font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;margin:18px;background:#f6fbff;color:#072027}
+    .wrap{max-width:1200px;margin:0 auto}
+    .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 6px 22px rgba(2,6,23,0.06);}
+    .row{display:flex;gap:12px}
+    input,select,button{padding:8px;border-radius:8px;border:1px solid #e6eef0}
+    button{cursor:pointer}
+    pre{background:#f3f8f8;padding:12px;border-radius:8px;overflow:auto}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Quantum Trading Suite — Demo</h2>
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <label>Symbol</label>
+        <input id="symbol" value="BTCUSDT" />
+        <label>Risk %</label>
+        <input id="riskPercent" value="2" style="width:70px" />
+        <button id="analyzeBtn">🔍 Analyze</button>
+        <button id="backtestBtn">📈 Backtest</button>
+        <button id="marketDataBtn">📊 Market</button>
+      </div>
+
+      <div id="status">Ready</div>
+      <div id="results" style="margin-top:12px;display:none">
+        <h3 id="title">—</h3>
+        <div id="summary"></div>
+        <pre id="raw" style="max-height:300px"></pre>
+      </div>
+    </div>
+    <p style="margin-top:12px;color:#6b7280">Lưu ý: đây là demo client-side. Không commit API secret vào repo.</p>
+  </div>
+
+  <!-- Core scripts -->
+  <script src="apiClient.js"></script>
+  <script src="tradingEngine.js"></script>
+  <script>
+    const DOM = {
+      symbol: document.getElementById('symbol'),
+      analyzeBtn: document.getElementById('analyzeBtn'),
+      backtestBtn: document.getElementById('backtestBtn'),
+      marketDataBtn: document.getElementById('marketDataBtn'),
+      status: document.getElementById('status'),
+      results: document.getElementById('results'),
+      title: document.getElementById('title'),
+      summary: document.getElementById('summary'),
+      raw: document.getElementById('raw')
+    };
+
+    DOM.analyzeBtn.addEventListener('click', async () => {
+      const sym = DOM.symbol.value.trim().toUpperCase();
+      if (!sym) return alert('Nhập symbol');
+      DOM.status.textContent = '🔄 Lấy dữ liệu...';
+      try {
+        const res = await window.tradingEngine.analyzeSymbol(sym, { riskPercent: Number(document.getElementById('riskPercent').value || 2) });
+        DOM.status.textContent = '✅ Hoàn tất';
+        DOM.results.style.display = 'block';
+        DOM.title.textContent = `${sym} • ${res.signals.direction} • Confidence ${res.signals.confidence}%`;
+        DOM.summary.innerHTML = `Entry: <strong>${res.signals.entry}</strong> | SL: <strong>${res.signals.stopLoss}</strong> | TP: <strong>${res.signals.takeProfit}</strong>`;
+        DOM.raw.textContent = JSON.stringify(res, null, 2);
+      } catch (e) {
+        DOM.status.textContent = '❌ Lỗi: ' + e.message;
+        console.error(e);
+      }
+    });
+
+    DOM.marketDataBtn.addEventListener('click', async () => {
+      const sym = DOM.symbol.value.trim().toUpperCase();
+      if (!sym) return alert('Nhập symbol');
+      DOM.status.textContent = '🔄 Fetch market data...';
+      try {
+        const md = await window.apiClient.fetchMarketData(sym);
+        DOM.status.textContent = `Price: ${md.price} | Funding: ${(md.fundingRate*100).toFixed(4)}%`;
+      } catch (e) {
+        DOM.status.textContent = '❌ ' + e.message;
+      }
+    });
+
+    DOM.backtestBtn.addEventListener('click', async () => {
+      const sym = DOM.symbol.value.trim().toUpperCase();
+      if (!sym) return alert('Nhập symbol');
+      DOM.status.textContent = '🔄 Running backtest...';
+      try {
+        const bt = await window.tradingEngine.backtestSymbol(sym, { days: 30 });
+        DOM.status.textContent = `Backtest done: P&L ${bt.totalProfit.toFixed(2)}`;
+        DOM.raw.textContent = JSON.stringify(bt, null, 2);
+      } catch (e) {
+        DOM.status.textContent = '❌ ' + e.message;
+      }
+    });
+  </script>
+</body>
+</html>
